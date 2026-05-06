@@ -1,0 +1,14 @@
+<component name="DebugServers">
+  <generic-debug-target name="Generic" uniqueID="ccdd6faf-60a1-4e50-aff1-0d127777fb55">
+    <debugger version="1">
+      <debugger kind="GDB" isBundled="true" />
+      <env />
+    </debugger>
+    <gdbserver>
+      <env />
+    </gdbserver>
+    <console enabled="true" port="4444" />
+    <target reset-before="false" />
+    <connection custom-script="echo Connecting to target...\n&#10;$GDBTargetCommand$&#10;echo Connected to target!\n" warmup-ms="500" />
+  </generic-debug-target>
+</component>

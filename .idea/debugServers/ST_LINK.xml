@@ -1,0 +1,13 @@
+<component name="DebugServers">
+  <stlink-debug-target name="ST-LINK" uniqueID="86fbc1c1-2c22-47c4-a7c4-42b2a31b4909" selected="true">
+    <debugger version="1">
+      <debugger kind="GDB" isBundled="true" />
+      <env />
+    </debugger>
+    <gdbserver exe="$USER_HOME$/.local/share/stm32cube/bundles/stlink-gdbserver/7.13.0+st.3/bin/ST-LINK_gdbserver" programmer="$USER_HOME$/.local/share/stm32cube/bundles/programmer/2.22.0+st.1/bin" />
+    <st-link />
+    <device interface="SWD" reset-strategy="HARDWARE" connect-under-reset="true" />
+    <connection extended-remote="false" port="61234" warmup-ms="500" />
+    <swo enabled="false" port="61235" />
+  </stlink-debug-target>
+</component>
