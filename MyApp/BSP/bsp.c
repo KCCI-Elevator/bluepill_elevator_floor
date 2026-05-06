@@ -285,9 +285,13 @@ extern uint32_t HAL_GetTick(void);
 /**
  * @brief BSP 초기화 (BluePill 보드)
  */
-void bspInit(void) {
+bool bspInit(void) {
     // BluePill 초기화 (필요한 추가 초기화 코드 추가)
     // GPIO, SPI, CAN 등은 main.c 또는 각 모듈에서 이미 초기화됨
+    if (adcInit() != true) return false;
+    if (ts0224Init() != true) return false;
+
+    return true;
 }
 
 /**

@@ -67,6 +67,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(DEF_LED_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : TS0224_D0_Pin */
+  GPIO_InitStruct.Pin = TS0224_D0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(TS0224_D0_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PA4 OLED_CS_Pin */
   GPIO_InitStruct.Pin = GPIO_PIN_4|OLED_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;

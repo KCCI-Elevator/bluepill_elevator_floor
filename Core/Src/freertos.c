@@ -54,6 +54,13 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for myTaskHall */
+osThreadId_t myTaskHallHandle;
+const osThreadAttr_t myTaskHall_attributes = {
+  .name = "myTaskHall",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -61,6 +68,7 @@ const osThreadAttr_t defaultTask_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
+void HallTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -93,6 +101,9 @@ void MX_FREERTOS_Init(void) {
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of myTaskHall */
+  myTaskHallHandle = osThreadNew(HallTask, NULL, &myTaskHall_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -128,6 +139,24 @@ __weak void StartDefaultTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
+}
+
+/* USER CODE BEGIN Header_HallTask */
+/**
+* @brief Function implementing the myTaskHall thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_HallTask */
+__weak void HallTask(void *argument)
+{
+  /* USER CODE BEGIN HallTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END HallTask */
 }
 
 /* Private application code --------------------------------------------------*/

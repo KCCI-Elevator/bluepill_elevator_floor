@@ -46,7 +46,11 @@ add_executable(${CMAKE_PROJECT_NAME}
         MyApp/Application/app.c
         MyApp/Application/app.h
         MyApp/Driver/servo.c
-        MyApp/Driver/servo.h)
+        MyApp/Driver/servo.h
+        MyApp/Driver/my_adc.c
+        MyApp/Driver/my_adc.h
+        MyApp/Driver/ts0224.c
+        MyApp/Driver/ts0224.h)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         MyApp/Common
