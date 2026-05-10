@@ -3,6 +3,9 @@
 
 #include "def.h"
 
+  #include "my_adc.h"
+  #include "ts0224.h"
+
 // MCU가 F429인지 BLUEPILL인지 프로젝트 전역 매크로 설정 필요
 // #define MCU_F429
 #define MCU_BLUEPILL
@@ -12,10 +15,12 @@
   #include "motor.h"
   #include "my_gpio.h"
   #include "my_can.h"
+
 #endif
 
 #ifdef MCU_BLUEPILL
   #include "hw_def.h"
+
 #endif
 
 // --- 열거형 (공통) ---
@@ -85,19 +90,20 @@ typedef struct {
 } bsp_elevator_input_t;
 
 // --- 함수 원형 (공통) ---
-void bspInit(void);
 void bspUpdate(void);
 uint32_t bspMillis(void);
 void bspDelay(uint32_t delay_ms);
 
 // --- F429 전용 함수 ---
 #ifdef MCU_F429
+void bspInit(void);
 void bspElevatorReadInput(bsp_elevator_input_t *input);
 void bspLiftMotorSet(bsp_lift_dir_t dir, uint16_t pwm);
 #endif
 
 // --- BluePill 전용 함수 ---
 #ifdef MCU_BLUEPILL
+bool bspInit(void);
 void bspDoorMotorSet(bsp_door_dir_t dir);
 uint8_t bspGetLocalFloor(void);
 bool bspReadHallSensor(uint8_t floor);

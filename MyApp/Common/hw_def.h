@@ -14,4 +14,5 @@
 #include "cmsis_os2.h"
 #include "can_comm.h"
 #include "servo.h"
+#include "ts0224.h" // 홀센서 헤더 추가
 #endif //BLUE_PILL_CAN_COMM_HW_DEF_H

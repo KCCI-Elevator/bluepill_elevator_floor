@@ -285,9 +285,13 @@ extern uint32_t HAL_GetTick(void);
 /**
  * @brief BSP 초기화 (BluePill 보드)
  */
-void bspInit(void) {
+bool bspInit(void) {
     // BluePill 초기화 (필요한 추가 초기화 코드 추가)
     // GPIO, SPI, CAN 등은 main.c 또는 각 모듈에서 이미 초기화됨
+    if (adcInit() != true) return false;
+    if (ts0224Init() != true) return false;
+
+    return true;
 }
 
 /**
@@ -349,15 +353,12 @@ uint8_t bspGetLocalFloor(void) {
  * 향후: 층별로 다른 핀을 사용하도록 수정 가능
  */
 bool bspReadHallSensor(uint8_t floor) {
-    // [주의] 현재는 전체 층이 같은 핀(PB1)을 사용
-    // 실제 구현에서는 floor 파라미터에 따라 다른 핀을 읽도록 수정 필요
+    if (floor == 0) return false;
 
-    if (floor == 0) {
-        return false;
+    if (ts0224IsDetectedAnalog() == true) {
+        return true;
     }
-
-    // PB1 핀 상태 읽기 (HIGH = 센서 감지)
-    return (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1) == GPIO_PIN_SET);
+    return false;
 }
 
 /**

@@ -53,6 +53,7 @@ void BusFault_Handler(void);
 void UsageFault_Handler(void);
 void DebugMon_Handler(void);
 void SysTick_Handler(void);
+void ADC1_2_IRQHandler(void);
 void USB_LP_CAN1_RX0_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 

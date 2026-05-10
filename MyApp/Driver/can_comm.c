@@ -46,27 +46,22 @@ void can_init(void) {
     }
 }
 
-void can_transmit(uint32_t id, uint8_t *data, uint8_t len)
-{
+void can_transmit(uint32_t id, uint8_t *data, uint8_t len) {
     CAN_TxHeaderTypeDef TxHeader;
     uint32_t TxMailbox;
 
-    TxHeader.StdId = id;                  // 표준 ID
-    TxHeader.ExtId = 0x00;                // 확장 ID (사용 안함)
-    TxHeader.IDE   = CAN_ID_STD;          // 표준 ID 식별자
-    TxHeader.RTR   = CAN_RTR_DATA;        // 데이터 프레임
-    TxHeader.DLC   = len;                 // 데이터 길이
-    TxHeader.TransmitGlobalTime = DISABLE;
-
-    while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0);
-
-    if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox) != HAL_OK) {
-        // ==========================================
-        // [수정 4] 치명적 버그 수정: while(1); 무한 루프 삭제
-        // 통신이 한 번 튀더라도 보드가 죽지 않고 다음 루프를 돌 수 있도록 살려줍니다.
-        // ==========================================
+    // 빈 사서함이 생길 때까지 아주 잠깐 기다리거나, 없으면 리턴하는 로직이 필요함
+    if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) == 0) {
+        // 사서함이 꽉 찼으면 일단 취소 (보통 노이즈나 버스 과부하 때문)
         return;
     }
+
+    TxHeader.StdId = id;
+    TxHeader.IDE   = CAN_ID_STD; // Standard 모드인지 확인!
+    TxHeader.RTR   = CAN_RTR_DATA;
+    TxHeader.DLC   = len;
+
+    HAL_CAN_AddTxMessage(&hcan, &TxHeader, data, &TxMailbox);
 }
 
 // -----------------------------------------------------------------
@@ -83,6 +78,17 @@ void process_can_rx(uint32_t rx_id, uint8_t *rx_data, uint8_t rx_len) {
     // [예약] 향후 CAN 메시지 전처리 로직 추가 가능
 }
 
+
+
+#define CAN_RX_COUNT  8
+volatile uint32_t can_rx_ids[CAN_RX_COUNT];
+volatile uint8_t  can_rx_bufs[CAN_RX_COUNT][8];
+volatile uint8_t  can_rx_lens[CAN_RX_COUNT];
+
+// 큐 관리를 위한 인덱스 변수
+volatile uint8_t can_rx_head = 0; // 데이터를 넣는 위치
+volatile uint8_t can_rx_tail = 0; // 데이터를 꺼내는 위치
+
 /**
  * @brief CAN FIFO0 수신 인터럽트 콜백
  */
@@ -91,28 +97,26 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     CAN_RxHeaderTypeDef RxHeader;
     uint8_t rx_data[8];
 
-    if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, rx_data) == HAL_OK)
+    // FIFO에 메시지가 있는 동안 계속 꺼냅니다.
+    while (HAL_CAN_GetRxFifoFillLevel(hcan, CAN_RX_FIFO0) > 0)
     {
-        if (RxHeader.IDE == CAN_ID_STD) {
-            can_rx_id = RxHeader.StdId;
-        } else {
-            can_rx_id = RxHeader.ExtId;
+        if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, rx_data) == HAL_OK)
+        {
+            // 다음 저장할 칸 계산
+            uint8_t next_head = (can_rx_head + 1) % CAN_RX_COUNT;
+
+            // 큐가 꽉 차지 않았을 때만 저장
+            if (next_head != can_rx_tail) {
+                can_rx_ids[can_rx_head] = (RxHeader.IDE == CAN_ID_STD) ? RxHeader.StdId : RxHeader.ExtId;
+                can_rx_lens[can_rx_head] = RxHeader.DLC;
+
+                for(int i=0; i<RxHeader.DLC; i++) {
+                    can_rx_bufs[can_rx_head][i] = rx_data[i];
+                }
+
+                can_rx_head = next_head;
+                can_rx_flag = 1; // 메인 루프에 알림
+            }
         }
-
-        can_rx_len = RxHeader.DLC;
-
-        for (uint8_t i = 0; i < RxHeader.DLC; i++) {
-            can_rx_buf[i] = rx_data[i];
-        }
-
-        for (uint8_t i = RxHeader.DLC; i < 8; i++) {
-            can_rx_buf[i] = 0;
-        }
-
-        // 수신 후 전처리 함수 호출
-        process_can_rx(can_rx_id, can_rx_buf, can_rx_len);
-
-        // 메인 루프(app.c)에 수신 완료 알림
-        can_rx_flag = 1;
     }
 }
